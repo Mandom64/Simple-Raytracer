@@ -1,31 +1,42 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <math.h>
 #include "vec3.h"
 #include "color.h"
 #include "ray.h"
+#include "hittable.h"
+#include "sphere.h"
 #define PUT_NEW_LINE(num) \
     for (int i = 0; i < (num); i++) \
         fprintf(stderr, "\n")
 
-int hit_sphere(vec3 center, double radius, const ray *r)
-{
-    vec3 oc = sub_vec3(r->orig, center);
-    double a = dot(r->dir, r->dir);
-    double b = 2.0 * dot(oc, r->dir);
-    double c = dot(oc, oc) - radius*radius;
-    double discriminant = b*b - 4*a*c;
-    return (discriminant >= 0);
-}
+// double hit_sphere(vec3 center, double radius, const ray *r)
+// {
+//     vec3 oc = sub_vec3(r->origin, center);
+//     double a = length_squared(r->direction);
+//     double half_b = dot(oc, r->direction);
+//     double c = length_squared(oc) - radius*radius;
+//     double discriminant = half_b*half_b - a*c;
 
-vec3 ray_color(const ray *r)
-{
-    if(hit_sphere(Vec3(0, 0, -1), 0.5, r))
-        return Vec3(1, 0, 0);
+//     if(discriminant < 0)
+//         return -1.0;
+//     else
+//         return (-half_b - sqrt(discriminant))/a;
+// }
 
-    vec3 unit_direction = unit_vector(r->dir);
-    double a = 0.5 * (unit_direction.e2 + 1.0);
-    return add_vec3(tmul_vec3(color(1.0, 1.0, 1.0), (1.0-a)), 
-        tmul_vec3(color(0.5, 0.7, 1.0), a));  
-}
+// vec3 ray_color(ray *r)
+// {
+//     double t = hit_sphere((vec3){0, 0, -1}, 0.5, r);
+//     if(t > 0.0) {
+//         vec3 N = unit_vector(sub_vec3(point_at(r, t), (vec3){0, 0, -1}));
+//         return tmul_vec3(add_vec3(N, (vec3){1, 1, 1}), 0.5);
+//     }
+
+//     vec3 unit_direction = unit_vector(r->direction);
+//     double a = 0.5 * (unit_direction.e2 + 1.0);
+//     return add_vec3(tmul_vec3(color(1.0, 1.0, 1.0), (1.0-a)), 
+//         tmul_vec3(color(0.5, 0.7, 1.0), a));  
+// }
 
 int main()
 {
@@ -38,15 +49,15 @@ int main()
         double viewport_height = 2.0;
         double viewport_width = aspect_ratio * viewport_height;
         double focal_length = 1.0;
-        vec3 camera_center = Vec3(0, 0, 0);
+        vec3 camera_center = {0, 0, 0};
 
-        vec3 viewport_u = Vec3(viewport_width, 0, 0);
-        vec3 viewport_v = Vec3(0, -viewport_height, 0);
+        vec3 viewport_u = {viewport_width, 0, 0};
+        vec3 viewport_v = {0, -viewport_height, 0};
 
         vec3 pixel_delta_u = div_vec3(viewport_u, image_width);
         vec3 pixel_delta_v = div_vec3(viewport_v, image_height); 
 
-        vec3 viewport_upper_left = sub_vec3(sub_vec3(sub_vec3(camera_center, Vec3(0, 0, focal_length)), 
+        vec3 viewport_upper_left = sub_vec3(sub_vec3(sub_vec3(camera_center, (vec3){0, 0, focal_length}), 
             div_vec3(viewport_u, 2)), div_vec3(viewport_v, 2));
 
         vec3 pixel00_loc = add_vec3(viewport_upper_left, 
@@ -63,11 +74,10 @@ int main()
                     add_vec3(tmul_vec3(pixel_delta_u, i), tmul_vec3(pixel_delta_v, j)));
                 vec3 ray_direction = sub_vec3(pixel_center, camera_center);
                 ray r;
-                r.orig = camera_center;
-                r.dir = ray_direction;
-                vec3 pixel_color = ray_color(&r);
-                //print_ray(&r);
-                write_color(pixel_color);
+                r.origin = camera_center;
+                r.direction = ray_direction;
+                //vec3 pixel_color = ray_color(&r);
+                //write_color(pixel_color);
             }
         }
         fprintf(stderr, "\ndone"); 
