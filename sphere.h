@@ -1,6 +1,5 @@
 #ifndef SPHERE_H
 #define SPHERE_H
-#include <stdbool.h>
 #include "hittable.h"
 #include "vec3.h"
 
@@ -26,13 +25,13 @@ int hit_sphere(sphere *s, ray *r, double ray_tmin, double ray_tmax,
 	if(root <= ray_tmin || ray_tmax <=root) {
 		root = 	(-half_b + sqrtd) / a;
 		if(root <= ray_tmin || ray_tmax <= root)
-			return false;
+			return 0;
 	}
+
 	rec->t = root;
 	rec->point3 = point_at(r, rec->t);
 	rec->normal = tdiv_vec3((sub_vec3(rec->point3, center)), radius);
-
-	
+	return 1;
 }
 
 #endif
